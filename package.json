@@ -1,0 +1,26 @@
+{
+  "name": "Task_1",
+  "version": "1.0.0",
+  "description": "Node concepts, TODO task",
+  "main": "index.js",
+  "repository": "https://github.com/Samuel1s",
+  "author": "<Samuel Santos>",
+  "license": "MIT",
+  "private": null,
+  "scripts": {
+    "start": "nodemon server.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "uuid": "^9.0.0",
+    "uuid-validate": "^0.0.3"
+  },
+  "devDependencies": {
+    "jest": "^29.2.1",
+    "nodemon": "^2.0.20",
+    "supertest": "^6.3.0"
+  }
+}
