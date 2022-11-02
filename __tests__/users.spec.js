@@ -1,8 +1,6 @@
 const request = require('supertest')
-const { v4: uuidv4 } = require('uuid')
-const validate = require('uuid-validate')
-
-const app = require('../index')
+const { validate } = require('uuid')
+const app = require('../')
 
 describe('Users', () => {
   it('should be able to create a new user', async () => {
@@ -13,11 +11,8 @@ describe('Users', () => {
         username: 'johndoe'
       })
     expect(201)
-    
     expect(validate(response.body.id)).toBe(true)
-
     expect(response.body).toMatchObject({
-      id: uuidv4(),
       name: 'John Doe',
       username: 'johndoe',
       todos: []

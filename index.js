@@ -14,23 +14,31 @@ const users = []
 // MIDDLEWARE. 
 function checksExistsUserAccount(req, res, next) {
     const { username } = req.headers
-    const userExist = users.some(user => user.username === username)
-  
-    if(!userExist) {
-      return res.status(400).json({ error: 'User not exist!!' })
-    }
-  
+    
     const userFound = users.find(user => user.username === username)
-    req.userExist = userFound
+  
+    if(!userFound) {
+      return res.status(400).json({ error: 'User not found!!' })
+    }
+
+    req.user = userFound
     next()  
 }
 
+function checkIfUserAlreadyExist (req, res, next) {
+    const { username } = req.body
+    const userAlreadyExists = users.some((user) => user.username === username)
+    
+    if (userAlreadyExists) {
+        return res.status(400).json({ error: "User already exists" })
+    }
+
+    req.newUser = req.body
+    next()
+}
+
 function checkTodoExists (req, res, next) {
-    const {
-      user,
-      params: { id },
-    } = req
-  
+    const { user, params: { id } } = req
     const todo = user.todos.find((todo) => todo.id === id)
   
     if (!todo) {
@@ -38,23 +46,12 @@ function checkTodoExists (req, res, next) {
     }
   
     req.todo = todo
-  
-    return next()
+    next()
 }
 
-app.get('/users_list', (req, res) => {
-    res.status(200).json({users})
-})
-
 // USER ROUTES.
-app.post('/users', (req, res) => {
-    const { name, username } = req.body
-
-    const userAlreadyExists = users.some((user) => user.username === username)
-
-    if (userAlreadyExists) {
-      return res.status(400).json({ error: "User already exists" })
-    }
+app.post('/users', checkIfUserAlreadyExist, (req, res) => {
+    const { name, username } = req.newUser
 
     users.push({
         id: uuidv4(),
@@ -63,32 +60,31 @@ app.post('/users', (req, res) => {
         todos: []
     })
 
-    res.status(201).json(users)
+    res.status(201).json(...users )
 })
 
 // TODO ROUTES.
 app.get('/todos', checksExistsUserAccount, (req, res) => {
-    const { todos } = req.userExist
+    const { todos } = req.user
 
-    return res.status(200).json(todos)
+    return res.status(200).json([...todos])
 })
 
 app.post('/todos', checksExistsUserAccount, (req, res) => {
-    const { todos } = req.userExist
-    const { deadline } = req.body
+    const { user, body: { deadline, title } } = req
 
-    const newTask = 
+    const task = 
     { 
         id: uuidv4(), // precisa ser um uuid
-        title: req.body.title,
+        title: title,
         done: false, 
         deadline: new Date(deadline), 
         created_at: new Date()
     }
 
-    const newTodo = todos.push(newTask)
+    user.todos.push(task)
 
-    return res.status(201).json({newTodo, newTask})
+    return res.status(201).json(task)
 })
 
 app.put('/todos/:id', checksExistsUserAccount, checkTodoExists, (req, res) => {
